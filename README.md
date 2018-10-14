@@ -1,8 +1,8 @@
 **DISCLAIMER: This script is not endorsed nor supported by Datadog itself. You're on your own**
 
-# Run the Datadog agent on your Raspberry Pi
+# Build the datadog-agent release for your Raspberry Pi
 
-This uses a Scaleway C1 instance (bare-metal arm7 box) to compile and package a datadog-agent as close to the official amd64 release as possible.
+This uses a Scaleway C1 instance (bare-metal arm7 box) to compile and package a [datadog-agent](https://github.com/DataDog/datadog-agent) deb as close to the official amd64 release as possible.
 
 Using a scaleway box means you can benefit from their SSD volumes and avoid cloning hundreds of source code repos and thousands of small files on your pi's sd card, which would take ages. It also makes the build process easily reproducible and self-contained, and avoids cluttering your pi with build dependencies.
 
