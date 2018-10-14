@@ -24,7 +24,7 @@ $ brew install scw
 $ scw login
 
 # clone the gist
-$ git clone https://gist.github.com/5d1496353a29b95863876e1600cca5d5.git datadog-agent-armv7
+$ git clone https://github.com/adrienkohlbecker/datadog-agent-armv7.git
 $ cd datadog-agent-armv7
 
 # run the build (argument is agent version to target)
