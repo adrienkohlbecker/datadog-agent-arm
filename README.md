@@ -27,8 +27,8 @@ $ scw login
 $ git clone https://github.com/adrienkohlbecker/datadog-agent-armv7.git
 $ cd datadog-agent-armv7
 
-# run the build (argument is agent version to target)
-$ ./run.sh 6.5.2
+# run the build
+$ ./run.sh
 
 # this will leave a .deb in the working directory
 $ find . -name "*.deb"

@@ -7,9 +7,12 @@ AGENT_VERSION=$1
 
 export DEBIAN_FRONTEND=noninteractive
 
-# build dependencies
+# snmp-mibs-downloader is in the non-free repo
+apt-add-repository non-free
 apt-get update
-apt-get install -y python-pip python-virtualenv git curl pkg-config apt-transport-https mercurial rake
+
+# build dependencies
+apt-get install -y python-pip python-virtualenv git curl pkg-config apt-transport-https mercurial rake libssl-dev
 
 # snmp check
 apt-get install -y libsnmp-base libsnmp-dev snmp-mibs-downloader
@@ -26,7 +29,6 @@ apt-get install -y libsystemd-dev
   rm go1.11.1.linux-armv6l.tar.gz
 )
 export PATH=$PATH:/usr/local/go/bin
-
 
 # set up gopath and environment
 mkdir -p "/opt/agent/go/src" "/opt/agent/go/pkg" "/opt/agent/go/bin"
@@ -83,7 +85,7 @@ git clone https://github.com/DataDog/datadog-process-agent $GOPATH/src/github.co
   git checkout $AGENT_VERSION
 
   rake deps
-  rake install
+  rake build
 )
 
 ##########################################
@@ -120,14 +122,21 @@ git clone https://github.com/DataDog/datadog-process-agent $GOPATH/src/github.co
   # ldd buildroot/opt/datadog-agent/bin/agent/agent:
   # - libsnmp30
   # - libc6
-  # - libssl1.0.0
+  # - libssl1.1
+  # - libssl1.0.2
+  # - zlib1g
   # ldd buildroot/opt/datadog-agent/embedded/bin/trace-agent:
   # - libc6
   # ldd buildroot/opt/datadog-agent/embedded/bin/process-agent:
   # - libc6
-  echo "Dependencies: libsnmp30 libc6 libssl1.0.0"
+  echo "Depends: libsnmp30, libc6, libssl1.1, libssl1.0.2, zlib1g" >> buildroot/DEBIAN/control
   sed -i "s/Architecture: amd64/Architecture: armhf/" buildroot/DEBIAN/control
-  rm buildroot/DEBIAN/md5sums
+
+  # regenerate md5sums
+  (
+    cd buildroot
+    md5sum $(find * -type f -not -path 'DEBIAN/*') > DEBIAN/md5sums
+  )
 
   # re-package the deb
   dpkg-deb -b buildroot datadog-agent_1%3a${AGENT_VERSION}-1_armhf.deb

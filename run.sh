@@ -3,7 +3,7 @@
 IFS=$'\n\t'
 set -euxo pipefail
 
-AGENT_VERSION=$1
+AGENT_VERSION=$(cat VERSION)
 
 # create the server
 # C1 means you get a bare-metal armv7 box
