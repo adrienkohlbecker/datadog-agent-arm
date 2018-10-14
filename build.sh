@@ -111,11 +111,15 @@ git clone https://github.com/DataDog/datadog-process-agent $GOPATH/src/github.co
   rm -rf buildroot/usr
 
   # install our own stuff
-  install -v -D -m 755 "/opt/agent/go/src/github.com/DataDog/datadog-process-agent/process-agent"   buildroot/opt/datadog-agent/embedded/bin/process-agent
-  install -v -D -m 755 "/opt/agent/go/bin/trace-agent"                                              buildroot/opt/datadog-agent/embedded/bin/trace-agent
-  install -v -D -m 755 "/opt/agent/go/src/github.com/DataDog/datadog-agent/bin/agent/agent"         buildroot/opt/datadog-agent/bin/agent/agent
-  install -v -D -m 755 "/opt/agent/go/src/github.com/DataDog/datadog-agent/bin/agent/dd-agent"      buildroot/usr/bin/dd-agent
-  mkdir -p                                                                                          buildroot/opt/datadog-agent/run
+  install -v -D -m 755 "$GOPATH/src/github.com/DataDog/datadog-process-agent/process-agent"   buildroot/opt/datadog-agent/embedded/bin/process-agent
+  install -v -D -m 755 "$GOPATH/bin/trace-agent"                                              buildroot/opt/datadog-agent/embedded/bin/trace-agent
+  install -v -D -m 755 "$GOPATH/src/github.com/DataDog/datadog-agent/bin/agent/agent"         buildroot/opt/datadog-agent/bin/agent/agent
+  install -v -D -m 755 "$GOPATH/src/github.com/DataDog/datadog-agent/bin/agent/dd-agent"      buildroot/usr/bin/dd-agent
+  mkdir -p                                                                                    buildroot/opt/datadog-agent/run
+
+  # also copy agent dist folder
+  # roughly from https://github.com/DataDog/datadog-agent/blob/6.5.2/omnibus/config/software/datadog-agent.rb#L60-L66
+  rsync -vah --exclude conf.d --exclude datadog.yaml --exclude trace-agent.conf $GOPATH/src/github.com/DataDog/datadog-agent/bin/agent/dist buildroot/opt/datadog-agent/bin/agent/
 
   # fixup the metadata
   # dynamic libraries dependencies:
