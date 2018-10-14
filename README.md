@@ -21,6 +21,10 @@ brew install scw
 # login to scaleway
 scw login
 
+# clone the gist
+git clone https://gist.github.com/5d1496353a29b95863876e1600cca5d5.git datadog-agent-armv7
+cd datadog-agent-armv7
+
 # run the build (argument is agent version to target)
 ./run.sh 6.5.2
 ```
