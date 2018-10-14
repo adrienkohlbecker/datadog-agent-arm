@@ -22,6 +22,9 @@ scw start $SERVER
 # wait for it to boot
 scw exec --wait $SERVER /bin/true
 
+# run the build
 scw cp build.sh $SERVER:/root
 scw exec $SERVER /root/build.sh $AGENT_VERSION
+
+# get the deb
 scw cp $SERVER:/root/datadog-agent_1%3a${AGENT_VERSION}-1_armhf.deb .
