@@ -83,6 +83,7 @@ git clone https://github.com/DataDog/datadog-process-agent $GOPATH/src/github.co
 (
   cd $GOPATH/src/github.com/DataDog/datadog-process-agent
   git checkout $AGENT_VERSION
+  git am /root/0001-Don-t-use-atomic-64-bit-variants.patch
 
   rake deps
   rake build
