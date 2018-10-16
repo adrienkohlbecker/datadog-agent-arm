@@ -12,8 +12,9 @@ At the time of writing the agent release was 6.5.2, which is what this was teste
 
 ## Known issues
 
-- running python checks is unsupported as the arm build doesn't support embedding the python interpreter (see: https://github.com/DataDog/datadog-agent/issues/1069)
-- we apply the patch from this PR https://github.com/DataDog/datadog-process-agent/pull/198 while waiting for an official release (preventing the process agent from raising a nil pointer exception)
+We apply patches from the following PRs, pending an official release:
+- https://github.com/DataDog/datadog-agent/pull/2461: allowing the arm build to embed the python interpreter
+- https://github.com/DataDog/datadog-process-agent/pull/198: preventing the process agent from raising a nil pointer exception
 
 ## How to use:
 

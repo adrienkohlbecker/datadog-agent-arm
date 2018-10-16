@@ -47,6 +47,7 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
 (
   cd $GOPATH/src/github.com/DataDog/datadog-agent
   git checkout $AGENT_VERSION
+  git am /root/0001-Support-32-bit-address-sizes.patch
 
   # create virtualenv to hold pip deps
   virtualenv $GOPATH/venv
@@ -57,8 +58,7 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
   invoke -e deps
 
   # build the agent
-  # can't bundle cpython on arm 32 bits https://github.com/DataDog/datadog-agent/issues/1069
-  invoke -e agent.build --build-exclude=cpython
+  invoke -e agent.build
 )
 
 ##########################################
@@ -125,16 +125,17 @@ git clone https://github.com/DataDog/datadog-process-agent $GOPATH/src/github.co
   # fixup the metadata
   # dynamic libraries dependencies:
   # ldd buildroot/opt/datadog-agent/bin/agent/agent:
-  # - libsnmp30
   # - libc6
-  # - libssl1.1
+  # - libpython2.7
+  # - libsnmp30
   # - libssl1.0.2
+  # - libssl1.1
   # - zlib1g
   # ldd buildroot/opt/datadog-agent/embedded/bin/trace-agent:
   # - libc6
   # ldd buildroot/opt/datadog-agent/embedded/bin/process-agent:
   # - libc6
-  echo "Depends: libsnmp30, libc6, libssl1.1, libssl1.0.2, zlib1g" >> buildroot/DEBIAN/control
+  echo "Depends: libc6, libpython2.7, libsnmp30, libssl1.0.2, libssl1.1, zlib1g" >> buildroot/DEBIAN/control
   sed -i "s/Architecture: amd64/Architecture: armhf/" buildroot/DEBIAN/control
 
   # regenerate md5sums

@@ -24,6 +24,7 @@ scw exec --wait $SERVER /bin/true
 
 # run the build
 scw cp build.sh $SERVER:/root
+scw cp 0001-Support-32-bit-address-sizes.patch $SERVER:/root
 scw cp 0001-Don-t-use-atomic-64-bit-variants.patch $SERVER:/root
 scw exec $SERVER /root/build.sh $AGENT_VERSION
 
