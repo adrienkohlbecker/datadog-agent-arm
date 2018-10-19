@@ -1,0 +1,37 @@
+From 6bd5d60b2bbcda0c72e1eae97d7740136afcc660 Mon Sep 17 00:00:00 2001
+From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
+Date: Fri, 19 Oct 2018 21:48:08 +0200
+Subject: [PATCH] Disable datadog-pip
+
+---
+ omnibus/config/projects/agent.rb                      | 1 -
+ omnibus/config/software/datadog-agent-integrations.rb | 1 -
+ 2 files changed, 2 deletions(-)
+
+diff --git a/omnibus/config/projects/agent.rb b/omnibus/config/projects/agent.rb
+index 19311498..d9cdf988 100644
+--- a/omnibus/config/projects/agent.rb
++++ b/omnibus/config/projects/agent.rb
+@@ -124,7 +124,6 @@ end
+ dependency 'datadog-agent'
+ 
+ # Additional software
+-dependency 'datadog-pip'
+ dependency 'datadog-agent-integrations'
+ dependency 'jmxfetch'
+ 
+diff --git a/omnibus/config/software/datadog-agent-integrations.rb b/omnibus/config/software/datadog-agent-integrations.rb
+index 602dfbce..2e2bb0ad 100644
+--- a/omnibus/config/software/datadog-agent-integrations.rb
++++ b/omnibus/config/software/datadog-agent-integrations.rb
+@@ -8,7 +8,6 @@ require 'json'
+ 
+ name 'datadog-agent-integrations'
+ 
+-dependency 'datadog-pip'
+ dependency 'datadog-agent'
+ dependency 'protobuf-py'
+ 
+-- 
+2.17.0
+

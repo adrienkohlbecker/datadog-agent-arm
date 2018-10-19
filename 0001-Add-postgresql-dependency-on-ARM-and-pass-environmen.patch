@@ -1,0 +1,68 @@
+From 88816809c932a72d5ab8f131a93661d90f3921bc Mon Sep 17 00:00:00 2001
+From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
+Date: Fri, 19 Oct 2018 21:52:37 +0200
+Subject: [PATCH] Add postgresql dependency on ARM and pass environment to pip
+ commands
+
+---
+ .../config/software/datadog-agent-integrations.rb  | 14 ++++++++++++--
+ omnibus/lib/ostools.rb                             |  4 ++++
+ 2 files changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/omnibus/config/software/datadog-agent-integrations.rb b/omnibus/config/software/datadog-agent-integrations.rb
+index 602dfbce..02be397d 100644
+--- a/omnibus/config/software/datadog-agent-integrations.rb
++++ b/omnibus/config/software/datadog-agent-integrations.rb
+@@ -12,6 +12,12 @@ dependency 'datadog-pip'
+ dependency 'datadog-agent'
+ dependency 'protobuf-py'
+ 
++if arm?
++  # psycopg2 doesn't come with pre-built wheel on the arm architecture.
++  # to compile from source, it requires the `pg_config` executable present on the $PATH
++  dependency 'postgresql'
++end
++
+ if linux?
+   # add nfsiostat script
+   dependency 'nfsiostat'
+@@ -145,7 +151,7 @@ build do
+         "PATH" => "#{install_dir}/embedded/bin:#{ENV['PATH']}",
+       }
+       pip "install -c #{project_dir}/#{core_constraints_file} --no-deps .", :env => build_env, :cwd => "#{project_dir}/datadog_checks_base"
+-      command("#{install_dir}/embedded/bin/python -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{project_dir}/datadog_checks_base/datadog_checks/data/agent_requirements.in")
++      command("#{install_dir}/embedded/bin/python -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{project_dir}/datadog_checks_base/datadog_checks/data/agent_requirements.in", :env => build_env)
+     end
+ 
+     # Uninstall the deps that pip-compile installs so we don't include them in the final artifact
+@@ -164,7 +170,11 @@ build do
+     if windows?
+       command("#{python_bin} -m #{python_pip_req} #{windows_safe_path(install_dir)}\\#{agent_requirements_file}")
+     else
+-      pip "install -c #{project_dir}/#{core_constraints_file} --require-hashes --no-deps -r #{install_dir}/#{agent_requirements_file}"
++      build_env = {
++        "LD_RUN_PATH" => "#{install_dir}/embedded/lib",
++        "PATH" => "#{install_dir}/embedded/bin:#{ENV['PATH']}",
++      }
++      pip "install -c #{project_dir}/#{core_constraints_file} --require-hashes --no-deps -r #{install_dir}/#{agent_requirements_file}", :env => build_env
+     end
+ 
+     # install integrations
+diff --git a/omnibus/lib/ostools.rb b/omnibus/lib/ostools.rb
+index 87f2cd09..a76523e7 100644
+--- a/omnibus/lib/ostools.rb
++++ b/omnibus/lib/ostools.rb
+@@ -25,6 +25,10 @@ def windows?()
+     return ohai['platform_family'] == 'windows'
+ end
+ 
++def arm?()
++    return ohai['kernel']['machine'].start_with?('arm')
++end
++
+ def os
+     case RUBY_PLATFORM
+     when /linux/
+-- 
+2.17.0
+

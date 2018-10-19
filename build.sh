@@ -3,22 +3,13 @@
 IFS=$'\n\t'
 set -euxo pipefail
 
-AGENT_VERSION=$1
-
-export DEBIAN_FRONTEND=noninteractive
-
-# snmp-mibs-downloader is in the non-free repo
-apt-add-repository non-free
-apt-get update
+# version
+AGENT_VERSION=6.5.2
 
 # build dependencies
-apt-get install -y python-pip python-virtualenv git curl pkg-config apt-transport-https mercurial rake libssl-dev
-
-# snmp check
-apt-get install -y libsnmp-base libsnmp-dev snmp-mibs-downloader
-
-# systemd log tailing
-apt-get install -y libsystemd-dev
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get install -y python-dev python-virtualenv git curl mercurial bundler
 
 # Install Go
 (
@@ -37,6 +28,10 @@ export PATH=$GOPATH/bin:$PATH
 
 mkdir -p $GOPATH/src/github.com/DataDog
 
+# git needs this to apply the patches with `git am` we don't actually care about the committer name here
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+
 ##########################################
 #               MAIN AGENT               #
 ##########################################
@@ -47,7 +42,11 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
 (
   cd $GOPATH/src/github.com/DataDog/datadog-agent
   git checkout $AGENT_VERSION
-  git am /root/0001-Support-32-bit-address-sizes.patch
+  git am /root/0001-Add-postgresql-dependency-on-ARM-and-pass-environmen.patch
+  git am /root/0001-Use-omnibus-software-with-patches.patch
+  git am /root/0001-Compile-the-process-agent-from-source-within-omnibus.patch
+  git am /root/0001-Disable-datadog-pip.patch
+  git am /root/0001-Apply-patches-to-source.patch
 
   # create virtualenv to hold pip deps
   virtualenv $GOPATH/venv
@@ -55,96 +54,7 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
 
   # install build dependencies
   pip install -r requirements.txt
-  invoke -e deps
 
   # build the agent
-  invoke -e agent.build
-)
-
-##########################################
-#              TRACE AGENT               #
-##########################################
-
-git clone https://github.com/DataDog/datadog-trace-agent $GOPATH/src/github.com/DataDog/datadog-trace-agent
-
-(
-  cd $GOPATH/src/github.com/DataDog/datadog-trace-agent
-  git checkout $AGENT_VERSION
-
-  make install
-)
-
-##########################################
-#             PROCESS AGENT              #
-##########################################
-
-git clone https://github.com/DataDog/datadog-process-agent $GOPATH/src/github.com/DataDog/datadog-process-agent
-
-(
-  cd $GOPATH/src/github.com/DataDog/datadog-process-agent
-  git checkout $AGENT_VERSION
-  git am /root/0001-Don-t-use-atomic-64-bit-variants.patch
-
-  rake deps
-  rake build
-)
-
-##########################################
-#               BUILD DEB                #
-##########################################
-
-(
-  cd $HOME
-
-  # download official amd64 deb
-  apt-key adv --keyserver keyserver.ubuntu.com --recv 382E94DE
-  echo 'deb [arch=amd64] "https://apt.datadoghq.com" stable 6' > /etc/apt/sources.list.d/datadog.list
-  apt-get update
-  apt-get download datadog-agent:amd64=1:${AGENT_VERSION}-1
-  rm /etc/apt/sources.list.d/datadog.list
-  apt-get update
-
-  # extract it
-  dpkg-deb -R datadog-agent_1%3a${AGENT_VERSION}-1_amd64.deb buildroot
-
-  # remove amd64 bits
-  rm -rf buildroot/opt
-  rm -rf buildroot/usr
-
-  # install our own stuff
-  install -v -D -m 755 "$GOPATH/src/github.com/DataDog/datadog-process-agent/process-agent"   buildroot/opt/datadog-agent/embedded/bin/process-agent
-  install -v -D -m 755 "$GOPATH/bin/trace-agent"                                              buildroot/opt/datadog-agent/embedded/bin/trace-agent
-  install -v -D -m 755 "$GOPATH/src/github.com/DataDog/datadog-agent/bin/agent/agent"         buildroot/opt/datadog-agent/bin/agent/agent
-  install -v -D -m 755 "$GOPATH/src/github.com/DataDog/datadog-agent/bin/agent/dd-agent"      buildroot/usr/bin/dd-agent
-  mkdir -p                                                                                    buildroot/opt/datadog-agent/run
-
-  # also copy agent dist folder
-  # roughly from https://github.com/DataDog/datadog-agent/blob/6.5.2/omnibus/config/software/datadog-agent.rb#L60-L66
-  rsync -vah --exclude conf.d --exclude datadog.yaml --exclude trace-agent.conf $GOPATH/src/github.com/DataDog/datadog-agent/bin/agent/dist buildroot/opt/datadog-agent/bin/agent/
-
-  # fixup the metadata
-  # dynamic libraries dependencies:
-  # ldd buildroot/opt/datadog-agent/bin/agent/agent:
-  # - libc6
-  # - libpython2.7
-  # - libsnmp30
-  # - libssl1.0.2
-  # - libssl1.1
-  # - zlib1g
-  # ldd buildroot/opt/datadog-agent/embedded/bin/trace-agent:
-  # - libc6
-  # ldd buildroot/opt/datadog-agent/embedded/bin/process-agent:
-  # - libc6
-  echo "Depends: libc6, libpython2.7, libsnmp30, libssl1.0.2, libssl1.1, zlib1g" >> buildroot/DEBIAN/control
-  sed -i "s/Architecture: amd64/Architecture: armhf/" buildroot/DEBIAN/control
-
-  # regenerate md5sums
-  (
-    cd buildroot
-    md5sum $(find * -type f -not -path 'DEBIAN/*') > DEBIAN/md5sums
-  )
-
-  # re-package the deb
-  dpkg-deb -b buildroot datadog-agent_1%3a${AGENT_VERSION}-1_armhf.deb
-
+  invoke -e agent.omnibus-build --base-dir=$HOME/.omnibus --agent-version=$AGENT_VERSION
 )
