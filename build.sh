@@ -11,6 +11,9 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y python-dev python-virtualenv git curl mercurial bundler
 
+# TODO: validate why this is not handled by omnibus
+apt-get install -y libsystemd-dev
+
 # Install Go
 (
   cd /usr/local
