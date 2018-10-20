@@ -48,7 +48,6 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
   git am /root/0001-Add-postgresql-dependency-on-ARM-and-pass-environmen.patch
   git am /root/0001-Use-omnibus-software-with-patches.patch
   git am /root/0001-Compile-the-process-agent-from-source-within-omnibus.patch
-  git am /root/0001-Disable-datadog-pip.patch
   git am /root/0001-Apply-patches-to-source.patch
 
   # create virtualenv to hold pip deps
