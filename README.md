@@ -33,7 +33,7 @@ At the time of writing the agent release was 6.5.2, which is what this was teste
 
 ### Known issues
 
-- The trace agent makes heavy use of atomic.*Int64 class of functions, which all panic on 32 bits architectures. I was able to fix the process agent here DataDog/datadog-process-agent#198 but for trace I think somebody from Datadog would be better equipped to make the right choices, given the amount of call sites.
+- The trace agent makes heavy use of atomic.*Int64 class of functions, which all panic on 32 bits architectures. I was able to fix the process agent here https://github.com/DataDog/datadog-process-agent/pull/198 but for trace I think somebody from Datadog would be better equipped to make the right choices, given the amount of call sites.
 
 ### Patches
 
