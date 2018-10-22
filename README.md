@@ -37,8 +37,7 @@ $ cd datadog-agent-armv7
 # run the build
 $ ./run.sh
 
-# this will leave a .deb in the following directory
-$ ssh SCW_SERVER
-$ find ~/.omnibus/pkg -name "*.deb"
-./datadog-agent_1%3a6.5.2-1_armhf.deb
+# this will leave a .deb in the current directory
+$ find . -name "*.deb"
+./datadog-agent_6.5.2~armv7-1_armhf.deb
 ```

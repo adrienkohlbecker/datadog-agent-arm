@@ -7,6 +7,7 @@ set -euxo pipefail
 # C1 means you get a bare-metal armv7 box
 # debian stretch is the base OS for raspbian
 SERVER=$(scw create --commercial-type=C1 ubuntu-xenial)
+IP=$(scw ps -l | grep C1 | sed 's/\s\s\+/|/g' | cut -d'|' -f6)
 
 # ensure we drop the server at the end
 rm_server() {
@@ -20,7 +21,7 @@ scw start $SERVER
 # wait for it to boot
 scw exec --wait $SERVER /bin/true
 
-# run the build
+# copy the files
 scw cp build.sh $SERVER:/root
 scw cp 0001-Add-postgresql-dependency-on-ARM-and-pass-environmen.patch $SERVER:/root
 scw cp 0001-Apply-patches-to-source.patch                              $SERVER:/root
@@ -29,4 +30,8 @@ scw cp 0001-Compile-the-process-agent-from-source-within-omnibus.patch $SERVER:/
 scw cp 0001-Don-t-use-atomic-64-bit-variants.patch                     $SERVER:/root
 scw cp 0001-Support-32-bit-address-sizes.patch                         $SERVER:/root
 
+# run the build
 scw exec $SERVER /root/build.sh
+
+# grab the output
+scp "root@$IP:/root/.omnibus/pkg/*.deb" .
