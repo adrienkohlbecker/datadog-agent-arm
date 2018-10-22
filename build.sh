@@ -61,5 +61,5 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
   pip install -r requirements.txt
 
   # build the agent
-  invoke -e agent.omnibus-build --base-dir=$HOME/.omnibus --agent-version=$AGENT_VERSION
+  invoke -e agent.omnibus-build --base-dir=$HOME/.omnibus --release-version=$AGENT_VERSION
 )
