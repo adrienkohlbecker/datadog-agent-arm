@@ -11,7 +11,9 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y python-dev python-virtualenv git curl mercurial bundler
 
-# TODO: validate why this is not handled by omnibus
+# The agent loads systemd at runtime https://github.com/coreos/go-systemd/blob/a4887aeaa186e68961d2d6af7d5fbac6bd6fa79b/sdjournal/functions.go#L46
+# which means it doesn't need to be included in the omnibus build
+# but it requires the headers at build time https://github.com/coreos/go-systemd/blob/a4887aeaa186e68961d2d6af7d5fbac6bd6fa79b/sdjournal/journal.go#L27
 apt-get install -y libsystemd-dev
 
 # Install Go
