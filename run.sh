@@ -7,7 +7,6 @@ set -euxo pipefail
 # C1 means you get a bare-metal armv7 box
 # debian stretch is the base OS for raspbian
 SERVER=$(scw create --commercial-type=C1 ubuntu-xenial)
-IP=$(scw ps -l | grep C1 | sed 's/\s\s\+/|/g' | cut -d'|' -f6)
 
 # ensure we drop the server at the end
 rm_server() {
@@ -34,4 +33,5 @@ scw cp 0001-Support-32-bit-address-sizes.patch                         $SERVER:/
 scw exec $SERVER /root/build.sh
 
 # grab the output
+IP=$(scw ps -l | grep C1 | sed 's/\s\s\+/|/g' | cut -d'|' -f6)
 scp "root@$IP:/root/.omnibus/pkg/*.deb" .
