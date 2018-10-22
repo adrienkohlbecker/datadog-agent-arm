@@ -1,19 +1,19 @@
-From 88816809c932a72d5ab8f131a93661d90f3921bc Mon Sep 17 00:00:00 2001
+From ab5746dd67d09b7968930046fc4d296fe939ba09 Mon Sep 17 00:00:00 2001
 From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
 Date: Fri, 19 Oct 2018 21:52:37 +0200
 Subject: [PATCH] Add postgresql dependency on ARM and pass environment to pip
  commands
 
 ---
- .../config/software/datadog-agent-integrations.rb  | 14 ++++++++++++--
- omnibus/lib/ostools.rb                             |  4 ++++
- 2 files changed, 16 insertions(+), 2 deletions(-)
+ .../software/datadog-agent-integrations.rb       | 16 ++++++++++++++--
+ omnibus/lib/ostools.rb                           |  4 ++++
+ 2 files changed, 18 insertions(+), 2 deletions(-)
 
 diff --git a/omnibus/config/software/datadog-agent-integrations.rb b/omnibus/config/software/datadog-agent-integrations.rb
-index 602dfbce..02be397d 100644
+index 602dfbce..c5287fe1 100644
 --- a/omnibus/config/software/datadog-agent-integrations.rb
 +++ b/omnibus/config/software/datadog-agent-integrations.rb
-@@ -12,6 +12,12 @@ dependency 'datadog-pip'
+@@ -12,6 +12,14 @@ dependency 'datadog-pip'
  dependency 'datadog-agent'
  dependency 'protobuf-py'
  
@@ -21,14 +21,14 @@ index 602dfbce..02be397d 100644
 +  # psycopg2 doesn't come with pre-built wheel on the arm architecture.
 +  # to compile from source, it requires the `pg_config` executable present on the $PATH
 +  dependency 'postgresql'
-+  # same with libffi for the cffi wheel
++  # same with libffi to build the cffi wheel
 +  dependency 'libffi'
 +end
 +
  if linux?
    # add nfsiostat script
    dependency 'nfsiostat'
-@@ -145,7 +151,7 @@ build do
+@@ -145,7 +153,7 @@ build do
          "PATH" => "#{install_dir}/embedded/bin:#{ENV['PATH']}",
        }
        pip "install -c #{project_dir}/#{core_constraints_file} --no-deps .", :env => build_env, :cwd => "#{project_dir}/datadog_checks_base"
@@ -37,7 +37,7 @@ index 602dfbce..02be397d 100644
      end
  
      # Uninstall the deps that pip-compile installs so we don't include them in the final artifact
-@@ -164,7 +170,11 @@ build do
+@@ -164,7 +172,11 @@ build do
      if windows?
        command("#{python_bin} -m #{python_pip_req} #{windows_safe_path(install_dir)}\\#{agent_requirements_file}")
      else
