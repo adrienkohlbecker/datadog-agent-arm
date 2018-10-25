@@ -1,8 +1,8 @@
-From ab5746dd67d09b7968930046fc4d296fe939ba09 Mon Sep 17 00:00:00 2001
+From d059256ba2d797fede56b161e2cd0ebaf05818cb Mon Sep 17 00:00:00 2001
 From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
 Date: Fri, 19 Oct 2018 21:52:37 +0200
-Subject: [PATCH] Add postgresql dependency on ARM and pass environment to pip
- commands
+Subject: [PATCH] Add postgresql and libffi dependency on ARM to
+ datadog-agent-integrations
 
 ---
  .../software/datadog-agent-integrations.rb       | 16 ++++++++++++++--
@@ -10,7 +10,7 @@ Subject: [PATCH] Add postgresql dependency on ARM and pass environment to pip
  2 files changed, 18 insertions(+), 2 deletions(-)
 
 diff --git a/omnibus/config/software/datadog-agent-integrations.rb b/omnibus/config/software/datadog-agent-integrations.rb
-index 602dfbce..c5287fe1 100644
+index 9a5a2dbd..95145351 100644
 --- a/omnibus/config/software/datadog-agent-integrations.rb
 +++ b/omnibus/config/software/datadog-agent-integrations.rb
 @@ -12,6 +12,14 @@ dependency 'datadog-pip'
@@ -32,8 +32,8 @@ index 602dfbce..c5287fe1 100644
          "PATH" => "#{install_dir}/embedded/bin:#{ENV['PATH']}",
        }
        pip "install -c #{project_dir}/#{core_constraints_file} --no-deps .", :env => build_env, :cwd => "#{project_dir}/datadog_checks_base"
--      command("#{install_dir}/embedded/bin/python -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{project_dir}/datadog_checks_base/datadog_checks/data/agent_requirements.in")
-+      command("#{install_dir}/embedded/bin/python -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{project_dir}/datadog_checks_base/datadog_checks/data/agent_requirements.in", :env => build_env)
+-      command("#{install_dir}/embedded/bin/python -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{project_dir}/datadog_checks_base/datadog_checks/base/data/agent_requirements.in")
++      command("#{install_dir}/embedded/bin/python -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{project_dir}/datadog_checks_base/datadog_checks/base/data/agent_requirements.in", :env => build_env)
      end
  
      # Uninstall the deps that pip-compile installs so we don't include them in the final artifact
@@ -49,7 +49,7 @@ index 602dfbce..c5287fe1 100644
 +      pip "install -c #{project_dir}/#{core_constraints_file} --require-hashes --no-deps -r #{install_dir}/#{agent_requirements_file}", :env => build_env
      end
  
-     # install integrations
+     # Ship requirements-agent-release.txt file containing the versions of every check shipped with the agent
 diff --git a/omnibus/lib/ostools.rb b/omnibus/lib/ostools.rb
 index 87f2cd09..a76523e7 100644
 --- a/omnibus/lib/ostools.rb

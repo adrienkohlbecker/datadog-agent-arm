@@ -29,7 +29,7 @@ Using a scaleway box means you can benefit from their SSD volumes and avoid clon
 
 You get as output a .deb file aimed to be as close as possible to the official release (comes with configs, systemd units, ...)
 
-At the time of writing the agent release was 6.5.2, which is what this was tested with.
+At the time of writing the agent release was 6.6.0, which is what this was tested with.
 
 ### Known issues
 
@@ -41,10 +41,8 @@ We apply patches from the following PRs, pending an official release:
 - https://github.com/DataDog/datadog-agent/pull/2461: allowing the arm build to embed the python interpreter
 - https://github.com/DataDog/datadog-agent/pull/2495: compile the process-agent from source
 - https://github.com/DataDog/datadog-agent/pull/2497: add postgresql dependency for psycopg2
-- https://github.com/DataDog/datadog-process-agent/pull/198: preventing the process agent from raising a nil pointer exception
 - https://github.com/DataDog/omnibus-software/pull/218: compile python with `-fPIC`
 - https://github.com/DataDog/omnibus-software/pull/216: add libffi dependency to datadog-pip
-- https://github.com/DataDog/omnibus-software/pull/215: update cacerts shasum
 
 ### How to use:
 
@@ -64,5 +62,5 @@ $ ./run.sh
 
 # this will leave a .deb in the current directory
 $ find . -name "*.deb"
-./datadog-agent_6.5.2~armv7-1_armhf.deb
+./datadog-agent_6.6.0~armv7-1_armhf.deb
 ```

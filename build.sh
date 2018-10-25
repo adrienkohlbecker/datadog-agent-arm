@@ -4,7 +4,7 @@ IFS=$'\n\t'
 set -euxo pipefail
 
 # version
-AGENT_VERSION=6.5.2
+AGENT_VERSION=6.6.0
 
 # build dependencies
 export DEBIAN_FRONTEND=noninteractive
@@ -47,7 +47,7 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
 (
   cd $GOPATH/src/github.com/DataDog/datadog-agent
   git checkout $AGENT_VERSION
-  git am /root/0001-Add-postgresql-dependency-on-ARM-and-pass-environmen.patch
+  git am /root/0001-Add-postgresql-and-libffi-dependency-on-ARM-to-datad.patch
   git am /root/0001-Use-omnibus-software-with-patches.patch
   git am /root/0001-Compile-the-process-agent-from-source-within-omnibus.patch
   git am /root/0001-Apply-patches-to-source.patch

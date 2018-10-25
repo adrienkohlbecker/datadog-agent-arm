@@ -1,40 +1,25 @@
-From b2676306e538360f4ae75d00f5b6068283aae261 Mon Sep 17 00:00:00 2001
+From 5ff43dc3ed9b90589091f62b2e86e8454b47cac2 Mon Sep 17 00:00:00 2001
 From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
-Date: Fri, 19 Oct 2018 21:59:07 +0200
+Date: Thu, 25 Oct 2018 23:08:18 +0100
 Subject: [PATCH] Apply patches to source
 
 ---
- omnibus/config/software/datadog-agent.rb         | 2 ++
- omnibus/config/software/datadog-process-agent.rb | 3 +++
- 2 files changed, 5 insertions(+)
+ omnibus/config/software/datadog-agent.rb | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/omnibus/config/software/datadog-agent.rb b/omnibus/config/software/datadog-agent.rb
-index b85a9125..cb870549 100644
+index c259d935..b284736e 100644
 --- a/omnibus/config/software/datadog-agent.rb
 +++ b/omnibus/config/software/datadog-agent.rb
 @@ -30,6 +30,8 @@ build do
    # include embedded path (mostly for `pkg-config` binary)
    env = with_embedded_path(env)
  
-+  command "git am /root/0001-Support-32-bit-address-sizes.patch"
++  command "git am /root/0001-Fix-build-failure-on-32bit-armv7.patch"
 +
    # we assume the go deps are already installed before running omnibus
    command "invoke agent.build --rebuild --use-embedded-libs --no-development", env: env
    if windows?
-diff --git a/omnibus/config/software/datadog-process-agent.rb b/omnibus/config/software/datadog-process-agent.rb
-index af188964..7bef20c1 100644
---- a/omnibus/config/software/datadog-process-agent.rb
-+++ b/omnibus/config/software/datadog-process-agent.rb
-@@ -26,6 +26,9 @@ else
- end
- 
- build do
-+
-+  command "git am /root/0001-Don-t-use-atomic-64-bit-variants.patch"
-+
-   ship_license "https://raw.githubusercontent.com/DataDog/datadog-process-agent/#{version}/LICENSE"
-   # set GOPATH on the omnibus source dir for this software
-   gopath = Pathname.new(project_dir) + '../../../..'
 -- 
 2.17.0
 

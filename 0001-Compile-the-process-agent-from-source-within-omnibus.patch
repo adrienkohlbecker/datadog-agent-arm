@@ -1,4 +1,4 @@
-From e3286837221bd3303ab3af1898e12c3fd4de7af7 Mon Sep 17 00:00:00 2001
+From 9b1bb6d4b09515217ab390fd8b239526b51f5175 Mon Sep 17 00:00:00 2001
 From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
 Date: Fri, 19 Oct 2018 21:30:27 +0200
 Subject: [PATCH] Compile the process agent from source within omnibus
