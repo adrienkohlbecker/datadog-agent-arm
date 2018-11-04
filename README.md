@@ -57,6 +57,10 @@ $ scw login
 $ git clone https://github.com/adrienkohlbecker/datadog-agent-armv7.git
 $ cd datadog-agent-armv7
 
+# If you want to build the image and push it to docker hub
+# edit the build.sh file
+$ vim build.sh +10
+
 # run the build
 $ ./run.sh
 
