@@ -4,7 +4,7 @@ IFS=$'\n\t'
 set -euxo pipefail
 
 # version
-AGENT_VERSION=6.6.0
+AGENT_VERSION=6.11.1
 
 # build dependencies
 export DEBIAN_FRONTEND=noninteractive
@@ -50,7 +50,6 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
   git am /root/0001-Add-postgresql-and-libffi-dependency-on-ARM-to-datad.patch
   git am /root/0001-Use-omnibus-software-with-patches.patch
   git am /root/0001-Compile-the-process-agent-from-source-within-omnibus.patch
-  git am /root/0001-Apply-patches-to-source.patch
   git tag "$AGENT_VERSION-armv7"
 
   # create virtualenv to hold pip deps

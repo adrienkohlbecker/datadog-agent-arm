@@ -23,10 +23,8 @@ scw exec --wait $SERVER /bin/true
 # copy the files
 scw cp build.sh $SERVER:/root
 scw cp 0001-Add-postgresql-and-libffi-dependency-on-ARM-to-datad.patch $SERVER:/root
-scw cp 0001-Apply-patches-to-source.patch                              $SERVER:/root
 scw cp 0001-Use-omnibus-software-with-patches.patch                    $SERVER:/root
 scw cp 0001-Compile-the-process-agent-from-source-within-omnibus.patch $SERVER:/root
-scw cp 0001-Fix-build-failure-on-32bit-armv7.patch                     $SERVER:/root
 
 # run the build
 scw exec $SERVER /root/build.sh
