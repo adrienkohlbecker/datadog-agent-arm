@@ -3,10 +3,24 @@
 IFS=$'\n\t'
 set -euxo pipefail
 
+
+if [ "$1" == "arm64" ] || [ "$1" == "armv8" ] ; then
+
+  # ARM64-2GB means you get a bare-metal armv8/arm64 box
+  TYPE=ARM64-2GB
+
+elif [ "$1" == "armhf" ] || [ "$1" == "armv7" ] ; then
+
+  # C1 means you get a bare-metal armv7/armhf box
+  TYPE=C1
+
+else
+  echo "Unsupported arch"
+  exit 1
+fi
+
 # create the server
-# C1 means you get a bare-metal armv7 box
-# debian stretch is the base OS for raspbian
-SERVER=$(scw create --commercial-type=C1 ubuntu-xenial)
+SERVER=$(scw create --commercial-type=$TYPE ubuntu-xenial)
 
 # ensure we drop the server at the end
 rm_server() {

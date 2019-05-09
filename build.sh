@@ -16,14 +16,36 @@ apt-get install -y python-dev python-virtualenv git curl mercurial bundler
 # but it requires the headers at build time https://github.com/coreos/go-systemd/blob/a4887aeaa186e68961d2d6af7d5fbac6bd6fa79b/sdjournal/journal.go#L27
 apt-get install -y libsystemd-dev
 
-# Install Go
-(
-  cd /usr/local
-  curl -OL https://dl.google.com/go/go1.11.1.linux-armv6l.tar.gz
-  echo "bc601e428f458da6028671d66581b026092742baf6d3124748bb044c82497d42  go1.11.1.linux-armv6l.tar.gz" | sha256sum -c -
-  tar -xf go1.11.1.linux-armv6l.tar.gz
-  rm go1.11.1.linux-armv6l.tar.gz
-)
+if [ "$(dpkg --print-architecture)" == "arm64" ]; then
+  # on arm64 building the native extensions for the libffi gem fails. See https://github.com/ffi/ffi/issues/514
+  # Installing the library and headers on the build machine fixes it
+  apt-get install -y libffi-dev
+
+  # Install Go
+  (
+    cd /usr/local
+    curl -OL https://dl.google.com/go/go1.11.1.linux-arm64.tar.gz
+    echo "25e1a281b937022c70571ac5a538c9402dd74bceb71c2526377a7e5747df5522  go1.11.1.linux-arm64.tar.gz" | sha256sum -c -
+    tar -xf go1.11.1.linux-arm64.tar.gz
+    rm go1.11.1.linux-arm64.tar.gz
+  )
+
+elif [ "$(dpkg --print-architecture)" == "armhf" ]; then
+
+  # Install Go
+  (
+    cd /usr/local
+    curl -OL https://dl.google.com/go/go1.11.1.linux-armv6l.tar.gz
+    echo "bc601e428f458da6028671d66581b026092742baf6d3124748bb044c82497d42  go1.11.1.linux-armv6l.tar.gz" | sha256sum -c -
+    tar -xf go1.11.1.linux-armv6l.tar.gz
+    rm go1.11.1.linux-armv6l.tar.gz
+  )
+
+else
+  echo "Unsupported arch"
+  exit 1
+fi
+
 export PATH=$PATH:/usr/local/go/bin
 
 # set up gopath and environment
@@ -50,7 +72,7 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
   git am /root/0001-Add-postgresql-and-libffi-dependency-on-ARM-to-datad.patch
   git am /root/0001-Use-omnibus-software-with-patches.patch
   git am /root/0001-Compile-the-process-agent-from-source-within-omnibus.patch
-  git tag "$AGENT_VERSION-armv7"
+  git tag "$AGENT_VERSION-ak"
 
   # create virtualenv to hold pip deps
   virtualenv $GOPATH/venv
