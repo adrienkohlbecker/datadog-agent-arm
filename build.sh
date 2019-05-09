@@ -4,7 +4,7 @@ IFS=$'\n\t'
 set -euxo pipefail
 
 # version
-AGENT_VERSION=6.11.1
+export AGENT_VERSION=6.11.1
 
 # build dependencies
 export DEBIAN_FRONTEND=noninteractive

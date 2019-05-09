@@ -1,6 +1,6 @@
-From 81aca82c785bcdb7dc7550464d7e507e550df842 Mon Sep 17 00:00:00 2001
+From 64c85efb77a4bdbd76041e2d0bb24294f66db3b8 Mon Sep 17 00:00:00 2001
 From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
-Date: Thu, 25 Oct 2018 23:10:31 +0100
+Date: Thu, 9 May 2019 21:07:28 +0200
 Subject: [PATCH] Use omnibus software with patches
 
 ---
@@ -8,15 +8,18 @@ Subject: [PATCH] Use omnibus software with patches
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/omnibus/Gemfile b/omnibus/Gemfile
-index 75f66779..193c44ab 100644
+index bf6e9133..300f0c6b 100644
 --- a/omnibus/Gemfile
 +++ b/omnibus/Gemfile
-@@ -5,4 +5,4 @@ gem 'omnibus', git: 'https://github.com/DataDog/omnibus-ruby.git', branch: (ENV[
+@@ -5,7 +5,7 @@ gem 'omnibus', git: 'https://github.com/DataDog/omnibus-ruby.git', branch: (ENV[
  
  # Use Chef's software definitions. It is recommended that you write your own
  # software definitions, but you can clone/fork Chef's to get you started.
 -gem 'omnibus-software', git: 'https://github.com/DataDog/omnibus-software.git', branch: (ENV['OMNIBUS_SOFTWARE_VERSION'] || 'master')
 +gem 'omnibus-software', git: 'https://github.com/adrienkohlbecker/omnibus-software.git', branch: 'ak/arm-6.11.1'
+ 
+ 
+ gem 'mixlib-cli', '~> 1.7.0'
 -- 
-2.17.0
+2.21.0
 

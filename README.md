@@ -29,7 +29,7 @@ Using a scaleway box means you can benefit from their SSD volumes and avoid clon
 
 You get as output a .deb file aimed to be as close as possible to the official release (comes with configs, systemd units, ...)
 
-At the time of writing the agent release was 6.6.0, which is what this was tested with.
+At the time of writing the agent release was 6.11.1, which is what this was tested with.
 
 ### Known issues
 
@@ -62,5 +62,5 @@ $ ./run.sh
 
 # this will leave a .deb in the current directory
 $ find . -name "*.deb"
-./datadog-agent_6.6.0~armv7-1_armhf.deb
+./datadog-agent_6.11.1~armv7-1_armhf.deb
 ```
