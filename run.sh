@@ -4,12 +4,12 @@ IFS=$'\n\t'
 set -euxo pipefail
 
 
-if [ "$1" == "arm64" ] || [ "$1" == "armv8" ] ; then
+if [ "$1" == "arm64" ] | [ "$1" == "armv8" ] ; then
 
   # ARM64-2GB means you get a bare-metal armv8/arm64 box
   TYPE=ARM64-2GB
 
-elif [ "$1" == "armhf" ] || [ "$1" == "armv7" ] ; then
+elif [ "$1" == "armhf" ] | [ "$1" == "armv7" ] ; then
 
   # C1 means you get a bare-metal armv7/armhf box
   TYPE=C1
