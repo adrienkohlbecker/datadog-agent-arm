@@ -34,13 +34,16 @@ At the time of writing the agent release was 6.11.1, which is what this was test
 ### Known issues
 
 - (`armv7`/`armhf`) The trace agent makes heavy use of atomic.*Int64 class of functions, which all panic on 32 bits architectures. I was able to fix the process agent here https://github.com/DataDog/datadog-process-agent/pull/198 but for trace I think somebody from Datadog would be better equipped to make the right choices, given the amount of call sites.
+- The `aerospike` and `ibm_mq` don't build on ARM and are thus blacklisted.
 
 ### Patches
 
 We apply patches from the following PRs, pending an official release:
 - https://github.com/DataDog/datadog-agent/pull/2495: compile the process-agent from source
 - https://github.com/DataDog/datadog-agent/pull/2497: add postgresql dependency for psycopg2
+- https://github.com/DataDog/datadog-agent/pull/3456: blacklist the aerospike and ibm_mq checks
 - https://github.com/DataDog/omnibus-software/pull/216: add libffi dependency to datadog-pip
+- https://github.com/DataDog/omnibus-software/pull/314: update autoconf configuration to support building on newer platforms (arm64)
 
 ### How to use:
 
