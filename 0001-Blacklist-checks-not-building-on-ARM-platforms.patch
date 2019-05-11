@@ -1,18 +1,17 @@
-From 53d4d3be9cef1815268da44d98087839dc58a87b Mon Sep 17 00:00:00 2001
+From e8570ae4718b2234585d7203e88411f07c489f89 Mon Sep 17 00:00:00 2001
 From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
-Date: Sat, 11 May 2019 11:12:06 +0200
+Date: Sat, 11 May 2019 12:04:41 +0200
 Subject: [PATCH] Blacklist checks not building on ARM platforms
 
 ---
  omnibus/config/software/datadog-agent-integrations.rb | 8 ++++++++
- omnibus/lib/ostools.rb                                | 4 ++++
- 2 files changed, 12 insertions(+)
+ 1 file changed, 8 insertions(+)
 
 diff --git a/omnibus/config/software/datadog-agent-integrations.rb b/omnibus/config/software/datadog-agent-integrations.rb
-index aeb0cbfe..a3381d21 100644
+index ff3fca14..18c3387d 100644
 --- a/omnibus/config/software/datadog-agent-integrations.rb
 +++ b/omnibus/config/software/datadog-agent-integrations.rb
-@@ -50,6 +50,14 @@ if suse?
+@@ -61,6 +61,14 @@ if suse?
    blacklist_req.push(/^aerospike==/)  # Temporarily blacklist Aerospike until builder supports new dependency
  end
  
@@ -27,21 +26,6 @@ index aeb0cbfe..a3381d21 100644
  core_constraints_file = 'core_constraints.txt'
  final_constraints_file = 'final_constraints.txt'
  agent_requirements_file = 'agent_requirements.txt'
-diff --git a/omnibus/lib/ostools.rb b/omnibus/lib/ostools.rb
-index 87f2cd09..da214c40 100644
---- a/omnibus/lib/ostools.rb
-+++ b/omnibus/lib/ostools.rb
-@@ -25,6 +25,10 @@ def windows?()
-     return ohai['platform_family'] == 'windows'
- end
- 
-+def arm?()
-+    return ohai["kernel"]["machine"].start_with?("aarch") || ohai["kernel"]["machine"].start_with?("arm")
-+end
-+
- def os
-     case RUBY_PLATFORM
-     when /linux/
 -- 
 2.21.0
 
