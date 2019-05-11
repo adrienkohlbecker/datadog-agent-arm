@@ -13,7 +13,7 @@
            '~'
 ```
 
-## Build the datadog-agent release for ARM 32-bit and 64-bit platforms (Raspberry Pi, Scaleway...)
+## Datadog agent built from source for ARM 32-bit and 64-bit platforms (Raspberry Pi, Scaleway...)
 
 ### TL;DR
 
