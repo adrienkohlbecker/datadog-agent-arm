@@ -1,4 +1,4 @@
-From 2d5b3941b14405badd010d6c7e89863378315d56 Mon Sep 17 00:00:00 2001
+From 53d4d3be9cef1815268da44d98087839dc58a87b Mon Sep 17 00:00:00 2001
 From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
 Date: Sat, 11 May 2019 11:12:06 +0200
 Subject: [PATCH] Blacklist checks not building on ARM platforms
@@ -9,11 +9,11 @@ Subject: [PATCH] Blacklist checks not building on ARM platforms
  2 files changed, 12 insertions(+)
 
 diff --git a/omnibus/config/software/datadog-agent-integrations.rb b/omnibus/config/software/datadog-agent-integrations.rb
-index 5256fb2a..a2f3796a 100644
+index aeb0cbfe..a3381d21 100644
 --- a/omnibus/config/software/datadog-agent-integrations.rb
 +++ b/omnibus/config/software/datadog-agent-integrations.rb
-@@ -51,6 +51,14 @@ if suse?
-   blacklist_packages.push(/^aerospike==/)  # Temporarily blacklist Aerospike until builder supports new dependency
+@@ -50,6 +50,14 @@ if suse?
+   blacklist_req.push(/^aerospike==/)  # Temporarily blacklist Aerospike until builder supports new dependency
  end
  
 +if arm?
@@ -24,9 +24,9 @@ index 5256fb2a..a2f3796a 100644
 +  blacklist_req.push(/^pymqi==/)
 +end
 +
+ core_constraints_file = 'core_constraints.txt'
  final_constraints_file = 'final_constraints.txt'
  agent_requirements_file = 'agent_requirements.txt'
- agent_requirements_in = 'agent_requirements.in'
 diff --git a/omnibus/lib/ostools.rb b/omnibus/lib/ostools.rb
 index 87f2cd09..da214c40 100644
 --- a/omnibus/lib/ostools.rb

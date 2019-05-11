@@ -1,4 +1,4 @@
-From 003f99dc337294a63d7d20aa359d43c3cbb41768 Mon Sep 17 00:00:00 2001
+From 53f3dc3abb0af86f4e5ef2ae9e742a7b4e1cf406 Mon Sep 17 00:00:00 2001
 From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
 Date: Fri, 19 Oct 2018 21:52:37 +0200
 Subject: [PATCH] Add dependencies to build wheels on ARM platforms to
@@ -10,12 +10,12 @@ Subject: [PATCH] Add dependencies to build wheels on ARM platforms to
  2 files changed, 17 insertions(+), 2 deletions(-)
 
 diff --git a/omnibus/config/software/datadog-agent-integrations.rb b/omnibus/config/software/datadog-agent-integrations.rb
-index 5256fb2a..0ef737be 100644
+index aeb0cbfe..ff3fca14 100644
 --- a/omnibus/config/software/datadog-agent-integrations.rb
 +++ b/omnibus/config/software/datadog-agent-integrations.rb
-@@ -12,6 +12,17 @@ dependency 'datadog-agent'
- dependency 'pip2'
- dependency 'pip3'
+@@ -11,6 +11,17 @@ name 'datadog-agent-integrations'
+ dependency 'pip'
+ dependency 'datadog-agent'
  
 +if arm?
 +  # psycopg2 doesn't come with pre-built wheel on the arm architecture.
@@ -31,17 +31,18 @@ index 5256fb2a..0ef737be 100644
  if linux?
    # add nfsiostat script
    dependency 'unixodbc'
-@@ -140,8 +151,8 @@ build do
-       command "#{python2} -m piptools compile --generate-hashes --output-file #{windows_safe_path(install_dir)}\\#{agent_requirements_file} #{static_reqs_out_file}"
+@@ -152,9 +163,9 @@ build do
+       command("#{python_bin} -m #{python_pip_no_deps}\\datadog_checks_downloader --install-option=\"--install-scripts=#{windows_safe_path(install_dir)}/bin\"")
+       command("#{python_bin} -m piptools compile --generate-hashes --output-file #{windows_safe_path(install_dir)}\\#{agent_requirements_file} #{static_reqs_filtered_file}")
      else
-       command "#{pip2} install --no-deps .", :env => nix_build_env, :cwd => "#{project_dir}/datadog_checks_base"
--      command "#{pip2} install --no-deps .", :cwd => "#{project_dir}/datadog_checks_downloader"
--      command "#{python2} -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{static_reqs_out_file}"
-+      command "#{pip2} install --no-deps .", :env => nix_build_env, :cwd => "#{project_dir}/datadog_checks_downloader"
-+      command "#{python2} -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{static_reqs_out_file}", :env => nix_build_env
+-      pip "install -c #{project_dir}/#{core_constraints_file} --no-deps .", :cwd => "#{project_dir}/datadog_checks_downloader"
++      pip "install -c #{project_dir}/#{core_constraints_file} --no-deps .", :env => nix_build_env, :cwd => "#{project_dir}/datadog_checks_downloader"
+       pip "install -c #{project_dir}/#{core_constraints_file} --no-deps .", :env => nix_build_env, :cwd => "#{project_dir}/datadog_checks_base"
+-      command("#{install_dir}/embedded/bin/python -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{static_reqs_filtered_file}")
++      command("#{install_dir}/embedded/bin/python -m piptools compile --generate-hashes --output-file #{install_dir}/#{agent_requirements_file} #{static_reqs_filtered_file}", :env => nix_build_env)
      end
  
-     # From now on we don't need piptools anymore, uninstall its deps so we don't include them in the final artifact
+     # Uninstall the deps that pip-compile installs so we don't include them in the final artifact
 diff --git a/omnibus/lib/ostools.rb b/omnibus/lib/ostools.rb
 index 87f2cd09..da214c40 100644
 --- a/omnibus/lib/ostools.rb
