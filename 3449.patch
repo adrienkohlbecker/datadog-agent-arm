@@ -1,0 +1,31 @@
+From 1efaee8237cba75f4c008c762e6c1822f0a1082f Mon Sep 17 00:00:00 2001
+From: Olivier Vielpeau <olivier.vielpeau@datadoghq.com>
+Date: Fri, 10 May 2019 11:47:07 +0200
+Subject: [PATCH] [6.11.x] Use 6.11.x branch of omnibus-ruby
+
+---
+ release.json | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/release.json b/release.json
+index 30afab79a0..d357914c27 100644
+--- a/release.json
++++ b/release.json
+@@ -12,7 +12,7 @@
+ 		"INTEGRATIONS_CORE_VERSION": "6.11.0",
+ 		"PROCESS_AGENT_VERSION": "6.11.1",
+ 		"OMNIBUS_SOFTWARE_VERSION": "6.11.0",
+-		"OMNIBUS_RUBY_VERSION": "datadog-5.5.0",
++		"OMNIBUS_RUBY_VERSION": "6.11.x",
+ 		"JMXFETCH_VERSION": "0.27.0",
+ 		"JMXFETCH_HASH": "52aabf81abb4e42adcb28164b263f01b293dda1c686f845d133ebcd128f8b2ee"
+ 	},
+@@ -20,7 +20,7 @@
+ 		"INTEGRATIONS_CORE_VERSION": "6.11.0",
+ 		"PROCESS_AGENT_VERSION": "6.11.0",
+ 		"OMNIBUS_SOFTWARE_VERSION": "6.11.0",
+-		"OMNIBUS_RUBY_VERSION": "datadog-5.5.0",
++		"OMNIBUS_RUBY_VERSION": "6.11.x",
+ 		"JMXFETCH_VERSION": "0.27.0",
+ 		"JMXFETCH_HASH": "52aabf81abb4e42adcb28164b263f01b293dda1c686f845d133ebcd128f8b2ee"
+ 	},

@@ -42,6 +42,7 @@ We apply patches from the following PRs, pending an official release:
 - https://github.com/DataDog/datadog-agent/pull/2495: compile the process-agent from source
 - https://github.com/DataDog/datadog-agent/pull/2497: add postgresql dependency for psycopg2
 - https://github.com/DataDog/datadog-agent/pull/3456: blacklist the aerospike and ibm_mq checks
+- https://github.com/DataDog/datadog-agent/pull/3449: Fix omnibus-ruby breaking change
 - https://github.com/DataDog/omnibus-software/pull/216: add libffi dependency to datadog-pip
 - https://github.com/DataDog/omnibus-software/pull/314: update autoconf configuration to support building on newer platforms (arm64)
 

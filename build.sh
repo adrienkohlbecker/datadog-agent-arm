@@ -88,6 +88,7 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
   git am /root/0001-Blacklist-checks-not-building-on-ARM-platforms.patch
   git am /root/0001-Use-omnibus-software-with-patches.patch
   git am /root/0001-Compile-the-process-agent-from-source-within-omnibus.patch
+  git am /root/3449.patch
   git tag "$AGENT_VERSION-ak"
 
   # create virtualenv to hold pip deps

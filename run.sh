@@ -40,6 +40,7 @@ scw cp 0001-Add-dependencies-to-build-wheels-on-ARM-platforms-to.patch $SERVER:/
 scw cp 0001-Blacklist-checks-not-building-on-ARM-platforms.patch       $SERVER:/root
 scw cp 0001-Use-omnibus-software-with-patches.patch                    $SERVER:/root
 scw cp 0001-Compile-the-process-agent-from-source-within-omnibus.patch $SERVER:/root
+scw cp 3449.patch                                                      $SERVER:/root
 
 # run the build
 scw exec $SERVER /root/build.sh
