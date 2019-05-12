@@ -46,5 +46,5 @@ scw cp 3449.patch                                                      $SERVER:/
 scw exec $SERVER /root/build.sh
 
 # grab the output
-IP=$(scw ps -l | grep C1 | sed 's/\s\s\+/|/g' | cut -d'|' -f6)
+IP=$(scw ps -l | grep $TYPE | sed 's/\s\s\+/|/g' | cut -d'|' -f6)
 scp "root@$IP:/root/.omnibus/pkg/*.deb" .
