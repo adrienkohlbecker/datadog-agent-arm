@@ -1,0 +1,31 @@
+From e8570ae4718b2234585d7203e88411f07c489f89 Mon Sep 17 00:00:00 2001
+From: Adrien Kohlbecker <adrien.kohlbecker@gmail.com>
+Date: Sat, 11 May 2019 12:04:41 +0200
+Subject: [PATCH] Blacklist checks not building on ARM platforms
+
+---
+ omnibus/config/software/datadog-agent-integrations.rb | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/omnibus/config/software/datadog-agent-integrations.rb b/omnibus/config/software/datadog-agent-integrations.rb
+index ff3fca14..18c3387d 100644
+--- a/omnibus/config/software/datadog-agent-integrations.rb
++++ b/omnibus/config/software/datadog-agent-integrations.rb
+@@ -61,6 +61,14 @@ if suse?
+   blacklist_req.push(/^aerospike==/)  # Temporarily blacklist Aerospike until builder supports new dependency
+ end
+ 
++if arm?
++  # These two checks don't build on ARM
++  blacklist.push('aerospike')
++  blacklist_req.push(/^aerospike==/)
++  blacklist.push('ibm_mq')
++  blacklist_req.push(/^pymqi==/)
++end
++
+ core_constraints_file = 'core_constraints.txt'
+ final_constraints_file = 'final_constraints.txt'
+ agent_requirements_file = 'agent_requirements.txt'
+-- 
+2.21.0
+
