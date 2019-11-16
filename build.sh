@@ -4,12 +4,12 @@ IFS=$'\n\t'
 set -euxo pipefail
 
 # version
-export AGENT_VERSION=6.11.1
+export AGENT_VERSION=6.15.0
 
 # build dependencies
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y python-dev python-virtualenv git curl mercurial bundler
+apt-get install -y python-dev python-virtualenv git curl mercurial bundler llvm clang linux-headers-generic autoconf
 
 # The agent loads systemd at runtime https://github.com/coreos/go-systemd/blob/a4887aeaa186e68961d2d6af7d5fbac6bd6fa79b/sdjournal/functions.go#L46
 # which means it doesn't need to be included in the omnibus build
@@ -25,6 +25,15 @@ apt-get install -y m4
 #     make[2]: yacc: Command not found
 apt-get install -y byacc
 
+# Agent uses cmake and requires version >= 3.12. Ubuntu has it starting from cosmic
+add-apt-repository -y ppa:janisozaur/cmake-update
+apt-get update
+apt-get install -y cmake
+
+# gimme for go
+curl -sL -o /usr/local/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+chmod +x /usr/local/bin/gimme
+
 if [ "$(dpkg --print-architecture)" == "arm64" ]; then
   # on arm64 building the native extensions for the libffi gem fails. See https://github.com/ffi/ffi/issues/514
   # Installing the library and headers on the build machine fixes it
@@ -33,10 +42,10 @@ if [ "$(dpkg --print-architecture)" == "arm64" ]; then
   # Install Go
   (
     cd /usr/local
-    curl -OL https://dl.google.com/go/go1.11.1.linux-arm64.tar.gz
-    echo "25e1a281b937022c70571ac5a538c9402dd74bceb71c2526377a7e5747df5522  go1.11.1.linux-arm64.tar.gz" | sha256sum -c -
-    tar -xf go1.11.1.linux-arm64.tar.gz
-    rm go1.11.1.linux-arm64.tar.gz
+    curl -OL https://dl.google.com/go/go1.13.4.linux-arm64.tar.gz
+    echo "8b8d99eb07206f082468fb4d0ec962a819ae45d54065fc1ed6e2c502e774aaf0  go1.13.4.linux-arm64.tar.gz" | sha256sum -c -
+    tar -xf go1.13.4.linux-arm64.tar.gz
+    rm go1.13.4.linux-arm64.tar.gz
   )
 
 elif [ "$(dpkg --print-architecture)" == "armhf" ]; then
@@ -44,10 +53,10 @@ elif [ "$(dpkg --print-architecture)" == "armhf" ]; then
   # Install Go
   (
     cd /usr/local
-    curl -OL https://dl.google.com/go/go1.11.1.linux-armv6l.tar.gz
-    echo "bc601e428f458da6028671d66581b026092742baf6d3124748bb044c82497d42  go1.11.1.linux-armv6l.tar.gz" | sha256sum -c -
-    tar -xf go1.11.1.linux-armv6l.tar.gz
-    rm go1.11.1.linux-armv6l.tar.gz
+    curl -OL https://dl.google.com/go/go1.13.4.linux-armv6l.tar.gz
+    echo "9f76e6353c9ae2dcad1731b7239531eb8be2fe171f29f2a9c5040945a930fd41  go1.13.4.linux-armv6l.tar.gz" | sha256sum -c -
+    tar -xf go1.13.4.linux-armv6l.tar.gz
+    rm go1.13.4.linux-armv6l.tar.gz
   )
 
 else
@@ -64,7 +73,7 @@ export PATH=$GOPATH/bin:$PATH
 
 mkdir -p $GOPATH/src/github.com/DataDog
 
-# git needs this to apply the patches with `git am` we don't actually care about the committer name here
+# git needs this to apply patches with `git am` we don't actually care about the committer name here
 git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
 
@@ -84,11 +93,11 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
 (
   cd $GOPATH/src/github.com/DataDog/datadog-agent
   git checkout $AGENT_VERSION
-  git am /root/0001-Add-dependencies-to-build-wheels-on-ARM-platforms-to.patch
-  git am /root/0001-Blacklist-checks-not-building-on-ARM-platforms.patch
-  git am /root/0001-Use-omnibus-software-with-patches.patch
-  git am /root/0001-Compile-the-process-agent-from-source-within-omnibus.patch
-  git am /root/3449.patch
+
+  # Apply patches
+  git am /root/4377.patch
+
+  # Be explicit that this build isn't official
   git tag "$AGENT_VERSION-ak"
 
   # create virtualenv to hold pip deps
@@ -97,6 +106,10 @@ git clone https://github.com/DataDog/datadog-agent $GOPATH/src/github.com/DataDo
 
   # install build dependencies
   pip install -r requirements.txt
+
+  # Building with python 3 fails because the SSL module is not enabled
+  # Could not fetch URL https://pypi.org/simple/wheel/: There was a problem confirming the ssl certificate: HTTPSConnectionPool(host='pypi.org', port=443): Max retries exceeded with url: /simple/wheel/ (Caused by SSLError("Can't connect to HTTPS URL because the SSL module is not available.")) - skipping
+  export PYTHON_RUNTIMES=2
 
   # build the agent
   invoke -e agent.omnibus-build --base-dir=$HOME/.omnibus --release-version=$AGENT_VERSION

@@ -29,22 +29,18 @@ Using a scaleway box means you can benefit from their SSD volumes and avoid clon
 
 You get as output a .deb file aimed to be as close as possible to the official release (comes with configs, systemd units, ...)
 
-At the time of writing the agent release was 6.11.1, which is what this was tested with.
+At the time of writing the agent release was 6.15.0, which is what this was tested with.
 
 ### Known issues
 
 - (`armv7`/`armhf`) The trace agent makes heavy use of atomic.*Int64 class of functions, which all panic on 32 bits architectures. I was able to fix the process agent here https://github.com/DataDog/datadog-process-agent/pull/198 but for trace I think somebody from Datadog would be better equipped to make the right choices, given the amount of call sites.
 - The `aerospike` and `ibm_mq` don't build on ARM and are thus blacklisted.
+- The `python3` runtime is disabled because of an issue with the build: `Could not fetch URL https://pypi.org/simple/wheel/: There was a problem confirming the ssl certificate: HTTPSConnectionPool(host='pypi.org', port=443): Max retries exceeded with url: /simple/wheel/ (Caused by SSLError("Can't connect to HTTPS URL because the SSL module is not available.")) - skipping`
 
 ### Patches
 
 We apply patches from the following PRs, pending an official release:
-- https://github.com/DataDog/datadog-agent/pull/2495: compile the process-agent from source
-- https://github.com/DataDog/datadog-agent/pull/2497: add postgresql dependency for psycopg2
-- https://github.com/DataDog/datadog-agent/pull/3456: blacklist the aerospike and ibm_mq checks
-- https://github.com/DataDog/datadog-agent/pull/3449: Fix omnibus-ruby breaking change
-- https://github.com/DataDog/omnibus-software/pull/216: add libffi dependency to datadog-pip
-- https://github.com/DataDog/omnibus-software/pull/314: update autoconf configuration to support building on newer platforms (arm64)
+- https://github.com/DataDog/datadog-agent/pull/4377: Build system-probe from the agent omnibus recipe
 
 ### How to use:
 
@@ -67,5 +63,5 @@ $ ./run.sh arm64
 
 # this will leave a .deb in the current directory
 $ find . -name "*.deb"
-./datadog-agent_6.11.1~ak-1_armhf.deb
+./datadog-agent_6.15.0~ak-1_armhf.deb
 ```
