@@ -1,0 +1,186 @@
+From a4db441646ebe0298326d7be00ab3e6f56d67766 Mon Sep 17 00:00:00 2001
+From: Albert Vaca <albert.vaca@datadoghq.com>
+Date: Mon, 3 Jun 2019 12:27:09 +0200
+Subject: [PATCH 1/4] Build system-probe from the agent omnibus recipe
+
+---
+ omnibus/config/software/datadog-agent.rb | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/omnibus/config/software/datadog-agent.rb b/omnibus/config/software/datadog-agent.rb
+index 298c95a54d..68609de92a 100644
+--- a/omnibus/config/software/datadog-agent.rb
++++ b/omnibus/config/software/datadog-agent.rb
+@@ -117,13 +117,17 @@
+     # TODO(processes): change this to be ebpf:latest when we move to go1.12.x on the agent
+     command "invoke -e process-agent.build --go-version=1.10.1", :env => env
+     copy 'bin/process-agent/process-agent', "#{install_dir}/embedded/bin"
+-    # We don't use the system-probe in macOS builds
+-    if !osx?
+-      copy 'bin/system-probe/system-probe', "#{install_dir}/embedded/bin"
+-      block { File.chmod(0755, "#{install_dir}/embedded/bin/system-probe") }
+-    end
+   end
+ 
++
++  # Build the system-probe
++  if linux?
++    command "invoke -e system-probe.build", :env => env
++    copy 'bin/system-probe/system-probe', "#{install_dir}/embedded/bin"
++    block { File.chmod(0755, "#{install_dir}/embedded/bin/system-probe") }
++  end
++
++
+   if linux?
+     if debian?
+       erb source: "upstart_debian.conf.erb",
+
+From 3105f01d8fe9f599a01b926a05ad2867d1014cdb Mon Sep 17 00:00:00 2001
+From: Albert Vaca <albert.vaca@datadoghq.com>
+Date: Wed, 3 Jul 2019 17:30:14 +0200
+Subject: [PATCH 2/4] Build the system-probe with go 1.10
+
+---
+ omnibus/config/software/datadog-agent.rb |  2 +-
+ tasks/system_probe.py                    | 18 +++++++++++++++++-
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/omnibus/config/software/datadog-agent.rb b/omnibus/config/software/datadog-agent.rb
+index 68609de92a..8e628fb6f2 100644
+--- a/omnibus/config/software/datadog-agent.rb
++++ b/omnibus/config/software/datadog-agent.rb
+@@ -122,7 +122,7 @@
+ 
+   # Build the system-probe
+   if linux?
+-    command "invoke -e system-probe.build", :env => env
++    command "invoke -e system-probe.build --go-version=1.10.1", :env => env
+     copy 'bin/system-probe/system-probe', "#{install_dir}/embedded/bin"
+     block { File.chmod(0755, "#{install_dir}/embedded/bin/system-probe") }
+   end
+diff --git a/tasks/system_probe.py b/tasks/system_probe.py
+index e241beafff..1ed88189b9 100644
+--- a/tasks/system_probe.py
++++ b/tasks/system_probe.py
+@@ -18,10 +18,11 @@
+ EBPF_BUILDER_FILE = os.path.join(".", "tools", "ebpf", "Dockerfiles", "Dockerfile-ebpf")
+ 
+ BPF_TAG = "linux_bpf"
++GIMME_ENV_VARS = ['GOROOT', 'PATH']
+ 
+ 
+ @task
+-def build(ctx, race=False, incremental_build=False):
++def build(ctx, race=False, go_version=None, incremental_build=False):
+     """
+     Build the system_probe
+     """
+@@ -38,8 +39,23 @@ def build(ctx, race=False, incremental_build=False):
+         "BuildDate": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+     }
+ 
++    goenv = {}
++    # TODO: this is a temporary workaround. system probe had issues when built with go 1.11 and 1.12
++    if go_version:
++        lines = ctx.run("gimme {version}".format(version=go_version)).stdout.split("\n")
++        for line in lines:
++            for env_var in GIMME_ENV_VARS:
++                if env_var in line:
++                    goenv[env_var] = line[line.find(env_var)+len(env_var)+1:-1].strip('\'\"')
++        ld_vars["GoVersion"] = go_version
++
+     ldflags, gcflags, env = get_build_flags(ctx)
+ 
++    # extend PATH from gimme with the one from get_build_flags
++    if "PATH" in os.environ and "PATH" in goenv:
++        goenv["PATH"] += ":" + os.environ["PATH"]
++    env.update(goenv)
++
+     # Add custom ld flags
+     ldflags += ' '.join(["-X '{name}={value}'".format(name=main+key, value=value) for key, value in ld_vars.items()])
+     build_tags = get_default_build_tags() + [BPF_TAG]
+
+From e28d2cfa5f6cd4d49405f3bbc67c59cd7302f360 Mon Sep 17 00:00:00 2001
+From: Albert Vaca <albert.vaca@datadoghq.com>
+Date: Thu, 31 Oct 2019 12:41:42 +0100
+Subject: [PATCH 3/4] Remove references to system-probe from gitlab-ci
+
+Since now it's built as part of the main omnibus recipe
+---
+ .gitlab-ci.yml | 19 -------------------
+ 1 file changed, 19 deletions(-)
+
+diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
+index fecb7350cb..28966b7226 100644
+--- a/.gitlab-ci.yml
++++ b/.gitlab-ci.yml
+@@ -361,19 +361,6 @@ cluster_agent-build:
+     - $S3_CP_CMD $SRC_PATH/Dockerfiles/cluster-agent/datadog-cluster.yaml $S3_ARTIFACTS_URI/datadog-cluster.yaml
+     - $S3_CP_CMD --recursive $SRC_PATH/$CLUSTER_AGENT_BINARIES_DIR/dist/templates $S3_ARTIFACTS_URI/dist/templates
+ 
+-# build system-probe bin
+-system_probe-build:
+-  stage: binary_build
+-  # TODO(processes): change this to be ebpf:latest when we move to go1.12.x on the agent
+-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-builders/ebpf:go1.10.1
+-  before_script:
+-    - cd $SRC_PATH
+-    - inv -e deps --verbose --dep-vendor-only
+-  tags: [ "runner:main", "size:large" ]
+-  script:
+-    - inv -e system-probe.build
+-    - $S3_CP_CMD $SRC_PATH/$SYSTEM_PROBE_BINARIES_DIR/system-probe $S3_ARTIFACTS_URI/system-probe
+-
+ #
+ # integration_test
+ #
+@@ -423,8 +410,6 @@ run_dogstatsd_size_test:
+     - echo "About to build for $RELEASE_VERSION"
+     # remove artifacts from previous pipelines that may come from the cache
+     - rm -rf $OMNIBUS_PACKAGE_DIR/*
+-    # Retrieve the system-probe from S3
+-    - $S3_CP_CMD $S3_ARTIFACTS_URI/system-probe $SRC_PATH/$SYSTEM_PROBE_BINARIES_DIR/system-probe
+     # Artifacts and cache must live within project directory but we run omnibus in a neutral directory.
+     # Thus, we move the artifacts at the end in a gitlab-friendly dir.
+     # Use --skip-deps since the deps are installed by `before_script`.
+@@ -523,8 +508,6 @@ puppy_deb-x64:
+     - printf -- "$RPM_GPG_KEY" | gpg --import --batch
+     - export RPM_SIGNING_PASSPHRASE=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-agent.rpm_signing_key_passphrase_e09422b3 --with-decryption --query "Parameter.Value" --out text)
+     - set -x
+-    # Retrieve the system-probe from S3
+-    - $S3_CP_CMD $S3_ARTIFACTS_URI/system-probe $SRC_PATH/$SYSTEM_PROBE_BINARIES_DIR/system-probe
+     # use --skip-deps since the deps are installed by `before_script`
+     - inv -e agent.omnibus-build --release-version "$RELEASE_VERSION" --base-dir $OMNIBUS_BASE_DIR --omnibus-s3-cache --skip-deps
+     - find $OMNIBUS_BASE_DIR/pkg -type f -name '*.rpm' ! -name '*dbg*.rpm' -print0 | xargs -0 -I '{}' rpm -i '{}'
+@@ -585,8 +568,6 @@ agent_rpm-x64-a7:
+     - printf -- "$RPM_GPG_KEY" | gpg --import --batch
+     - export RPM_SIGNING_PASSPHRASE=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-agent.rpm_signing_key_passphrase_e09422b3 --with-decryption --query "Parameter.Value" --out text)
+     - set -x
+-    # Retrieve the system-probe from S3
+-    - $S3_CP_CMD $S3_ARTIFACTS_URI/system-probe $SRC_PATH/$SYSTEM_PROBE_BINARIES_DIR/system-probe
+     # use --skip-deps since the deps are installed by `before_script`
+     - inv -e agent.omnibus-build --release-version "$RELEASE_VERSION" --base-dir $OMNIBUS_BASE_DIR_SUSE --omnibus-s3-cache --skip-deps
+     - find $OMNIBUS_BASE_DIR_SUSE/pkg -type f -name '*.rpm' ! -name '*dbg*.rpm' -print0 | xargs -0 -I '{}' zypper in '{}'
+
+From 419b9e02db1d4adbe0ed4fb0ea480846cfdaa755 Mon Sep 17 00:00:00 2001
+From: Albert Vaca <albert.vaca@datadoghq.com>
+Date: Thu, 7 Nov 2019 16:51:58 +0100
+Subject: [PATCH 4/4] Use full path for go-bindata
+
+---
+ tasks/system_probe.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tasks/system_probe.py b/tasks/system_probe.py
+index 1ed88189b9..824d1f9370 100644
+--- a/tasks/system_probe.py
++++ b/tasks/system_probe.py
+@@ -278,7 +278,7 @@ def build_object_files(ctx, install=True):
+         # Now update the assets stored in the go code
+         commands.append("go get -u github.com/jteeuwen/go-bindata/...")
+ 
+-        assets_cmd = "go-bindata -pkg ebpf -prefix '{c_dir}' -modtime 1 -o '{go_file}' '{obj_file}' '{debug_obj_file}'"
++        assets_cmd = os.environ["GOPATH"]+"/bin/go-bindata -pkg ebpf -prefix '{c_dir}' -modtime 1 -o '{go_file}' '{obj_file}' '{debug_obj_file}'"
+         commands.append(assets_cmd.format(
+             c_dir=c_dir,
+             go_file=os.path.join(bpf_dir, "tracer-ebpf.go"),
