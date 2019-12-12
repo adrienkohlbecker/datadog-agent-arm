@@ -1,3 +1,5 @@
+**UPDATE: As of December 3rd, 2019, Datadog has official support for ARMv8 https://www.datadoghq.com/blog/datadog-arm-agent/. ARMv7, also provided by this project, remains unofficially supported.**
+
 **DISCLAIMER: This script is not endorsed nor supported by Datadog itself. You're on your own**
 
 ```
