@@ -17,6 +17,8 @@
 
 ## Datadog agent built from source for ARM 32-bit and 64-bit platforms (Raspberry Pi, Scaleway...)
 
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/adrienkohlbecker/datadog-agent-arm)](https://github.com/adrienkohlbecker/datadog-agent-arm/releases/latest) ![GitHub downloads](https://img.shields.io/github/downloads/adrienkohlbecker/datadog-agent-arm/total)
+
 ### TL;DR
 
 ARM packages for the datadog-agent are available in the release page https://github.com/adrienkohlbecker/datadog-agent-arm/releases
